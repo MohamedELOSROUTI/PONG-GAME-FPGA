@@ -63,7 +63,7 @@ begin
 		
 	rnd_generator : process(clk_50mhz, gamer1, gamer2)
 		begin
-			if rnd_cnt = 10 or gamer1(1) = '1' or gamer1(0) = '1' then
+			if rnd_cnt = 10 or gamer1(1) = '1' or gamer1(0) = '1' or gamer2(1) = '1' or gamer2(0) = '1' then
 				rnd_cnt <= 0;
 			else
 				rnd_cnt <= rnd_cnt + 1;
