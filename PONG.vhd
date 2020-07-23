@@ -7,21 +7,21 @@
 				gamer1     : in std_logic_vector(1 downto 0) := "00"; --buttons player 1
 				gamer2     : in std_logic_vector(1 downto 0) := "00"; --buttons player 2
 				rst        : in std_logic :='0';
-				leds       : out std_logic_vector(1 to 32) := "00000000000000000000000010001000"
+				leds       : out std_logic_vector(1 to 32) := "00000000000000100000000010001000"
 	);   
 	
 end PONG;
  
 architecture Behavourial of PONG is 
-type ETAT is (E1, E2, E3, E4, E5, E6, E7, E8, E9, E10, E11, E12, E13, E14, 
-				  E15, E16, E17, E18, E19, E20, E21, E22, E23, E24, Loose1, Loose2, ERROR);
+type state is (S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, 
+				  S15, S16, S17, S18, S19, S20, S21, S22, S23, S24, Loose1, Loose2);
 				  
-signal bar1_present, bar1_futur, bar2_present, bar2_futur : std_logic_vector(1 to 4) := "1000";
-signal etat_present : etat := Loose1;
-signal etat_futur : etat := Loose2;
-signal etat_precedent : etat := Loose2;
-signal cnt_10hz : integer range 0 to 50000000 := 0;
-signal clk_10hz : std_logic := '0';
+signal bar1_current, bar1_futur, bar2_current, bar2_futur : std_logic_vector(1 to 4) := "1000";
+signal current_state: state := S15;
+signal next_state: state := S20;
+signal previous_state : state := S10;
+signal cnt_8hz : integer range 0 to 50000000 := 0;
+signal clk_8hz : std_logic := '0';
 signal Clk_1Hz : std_logic :='0';
 signal Cnt_1Hz : integer range 0 to 50000000 :=0;
 signal rnd_cnt : integer range 0 to 10 := 0;
@@ -37,8 +37,6 @@ begin
 					cnt_1hz <= 0;
 					clk_1Hz <= not(clk_1hz);
 					
-				
-					
 				else
 				
 					cnt_1hz <= cnt_1hz + 1;
@@ -47,39 +45,39 @@ begin
 		end if;
 	end process clk_generator;
 	
-	clk_10hz_generator : process(clk_50mhz)
+	clk_8hz_generator : process(clk_50mhz)
 		begin
 			if rising_edge(clk_50mhz) then
-				if cnt_10hz = 3000000 then
-					cnt_10hz <= 0;
-					clk_10hz <= not(clk_10hz);
+				if cnt_8hz = 3000000 then
+					cnt_8hz <= 0;
+					clk_8hz <= not(clk_8hz);
 				else
 				
-					cnt_10hz <= cnt_10hz + 1;
+					cnt_8hz <= cnt_8hz + 1;
 				end if;
 			end if;
 			
-		end process clk_10hz_generator;
+		end process clk_8hz_generator;
 		
 	rnd_generator : process(clk_50mhz, gamer1, gamer2)
 		begin
-			if rnd_cnt = 10 or gamer1(1) = '1' or gamer1(0) = '1' or gamer2(1) = '1' or gamer2(0) = '1' then
+			if rnd_cnt >= 10 or gamer1(1) = '1' or gamer1(0) = '1' or gamer2(1) = '1' or gamer2(0) = '1' then
 				rnd_cnt <= 0;
 			else
 				rnd_cnt <= rnd_cnt + 1;
 			end if;
 		end process rnd_generator;
 		
-	logicBar1_entree: process(gamer1)
+	logicBar1_inputs: process(gamer1)
 		begin
-			case bar1_present is 
+			case bar1_current is 
 				when "1000" =>
 					if gamer1 = "10" then
 						bar1_futur <= "1000";
 					elsif gamer1 = "01" then
 						bar1_futur <= "0100";
 					else
-						bar1_futur <= bar1_present;
+						bar1_futur <= bar1_current;
 					end if;
 				when "0100" =>
 					if gamer1 = "10" then
@@ -87,7 +85,7 @@ begin
 					elsif gamer1 = "01" then
 						bar1_futur <= "0010";
 					else
-						bar1_futur <= bar1_present;
+						bar1_futur <= bar1_current;
 					end if;
 				when "0010" =>
 					if gamer1 = "10" then
@@ -95,7 +93,7 @@ begin
 					elsif gamer1 = "01" then
 						bar1_futur <= "0001";
 					else
-						bar1_futur <= bar1_present;
+						bar1_futur <= bar1_current;
 					end if;
 				when "0001" =>
 					if gamer1 = "10" then
@@ -104,17 +102,17 @@ begin
 						bar1_futur <= "0001";
 						
 					else 
-						bar1_futur <= bar1_present;
+						bar1_futur <= bar1_current;
 					end if;
 				when others =>
 					bar1_futur <= "1000";
 				
 				end case;
-	end process logicBar1_entree;
+	end process logicBar1_inputs;
 	
-		logicBar2_entree: process(clk_10hz, bar2_present)
+		logicBar2_inputs: process(clk_8hz, bar2_current)
 		begin
-			case bar2_present is 
+			case bar2_current is 
 			
 				when "1000" =>
 					if gamer2 = "10" then
@@ -122,7 +120,7 @@ begin
 					elsif gamer2 = "01" then
 						bar2_futur <= "0100";
 					else
-						bar2_futur <= bar2_present;
+						bar2_futur <= bar2_current;
 					end if;
 				when "0100" =>
 					if gamer2 = "10" then
@@ -130,7 +128,7 @@ begin
 					elsif gamer2 = "01" then
 						bar2_futur <= "0010";
 					else
-						bar2_futur <= bar2_present;
+						bar2_futur <= bar2_current;
 					end if;
 				when "0010" =>
 					if gamer2 = "10" then
@@ -138,7 +136,7 @@ begin
 					elsif gamer2 = "01" then
 						bar2_futur <= "0001";
 					else
-						bar2_futur <= bar2_present;
+						bar2_futur <= bar2_current;
 					end if;
 				when "0001" =>
 					if gamer2 = "10" then
@@ -146,7 +144,7 @@ begin
 					elsif gamer2 = "01" then
 						bar2_futur <= "0001";
 					else
-						bar2_futur <= bar2_present;
+						bar2_futur <= bar2_current;
 					end if;
 					
 				when others =>
@@ -154,409 +152,408 @@ begin
 				
 				end case;
 				
-	end process logicBar2_entree;
+	end process logicBar2_inputs;
 	
 
 	
-	LogicComb_entree: process(etat_present,clk_1hz)
+	LogicComb_entree: process(current_state)
 		begin
-			case etat_present is
+			case current_state is
 			
-				when E1 =>
+				when S1 =>
 					
-					if bar1_present(1) = '1' then
+					if bar1_current(1) = '1' then
 						if rnd_cnt <= 5 then
-							etat_futur <= E6;
+							next_state<= S6;
 						else 
-							etat_futur <= E5;
+							next_state<= S5;
 						end if;
 					else
-						etat_futur <= Loose1;
+						next_state<= Loose1;
 					end if;
 					
-				When E2 =>
+				When S2 =>
 					
-					if bar1_present(2)  = '1' then
+					if bar1_current(2)  = '1' then
 						if rnd_cnt <= 3 then
-								etat_futur <= E5;
+								next_state<= S5;
 						elsif rnd_cnt <= 6 then
-							etat_futur <= E6;
+							next_state<= S6;
 						elsif rnd_cnt <= 10 then
-							etat_futur <= E7;
+							next_state<= S7;
 						end if;
 			
 					else
-						etat_futur <= Loose1;
+						next_state<= Loose1;
 					end if;
 						
-				When E3 =>
+				When S3 =>
 					
-					if bar1_present(3)  = '1' then
+					if bar1_current(3)  = '1' then
 						if rnd_cnt <= 3 then
-							etat_futur <= E6;
+							next_state<= S6;
 						elsif rnd_cnt <= 6 then
-							etat_futur <= E7;
+							next_state<= S7;
 						else
-							etat_futur <= E8;
+							next_state<= S8;
 						end if;
 					else
-						etat_futur <= Loose1;
+						next_state<= Loose1;
 					end if;
 							
-				When E4 =>
+				When S4 =>
 					
-					if bar1_present(4) = '1' then
+					if bar1_current(4) = '1' then
 						if rnd_cnt <= 5 then
-							etat_futur <= E7;
+							next_state<= S7;
 						else
-							etat_futur <= E8;
+							next_state<= S8;
 						end if;
 					else 
-						etat_futur <= Loose1;
+						next_state<= Loose1;
 					end if;
 						
-				When E5 =>
-					if etat_precedent = E1 then
-						etat_futur <= E9;
-					elsif etat_precedent = E2 then
-						etat_futur <= E10;
-					elsif etat_precedent = E9 then
-						etat_futur <= E1;
-					elsif etat_precedent = E10 then
-						etat_futur <= E2;
+				When S5 =>
+					if previous_state = S1 then
+						next_state<= S9;
+					elsif previous_state = S2 then
+						next_state<= S10;
+					elsif previous_state = S9 then
+						next_state<= S1;
+					elsif previous_state = S10 then
+						next_state<= S2;
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 						
-				When E6 =>
-					if etat_precedent = E1 then
-						etat_futur <= E11;
-					elsif etat_precedent = E2 then
-						etat_futur <= E10;
-					elsif etat_precedent = E3 then
-						etat_futur <= E9;
-					elsif etat_precedent = E9 then
-						etat_futur <= E3;
-					elsif etat_precedent = E10 then
-						etat_futur <= E2;
-					elsif etat_precedent = E11 then
-						etat_futur <= E1;
+				When S6 =>
+					if previous_state = S1 then
+						next_state<= S11;
+					elsif previous_state = S2 then
+						next_state<= S10;
+					elsif previous_state = S3 then
+						next_state<= S9;
+					elsif previous_state = S9 then
+						next_state<= S3;
+					elsif previous_state = S10 then
+						next_state<= S2;
+					elsif previous_state = S11 then
+						next_state<= S1;
 					else
-						etat_futur <= ERROR;
+						
 					end if;
-				When E7 =>
-					if etat_precedent = E2 then
-						etat_futur <= E12;
-					elsif etat_precedent = E3 then
-						etat_futur <= E11;
-					elsif etat_precedent = E4 then
-						etat_futur <= E10;
-					elsif etat_precedent = E10 then
-						etat_futur <= E4;
-					elsif etat_precedent = E11 then
-						etat_futur <= E3;
-					elsif etat_precedent = E12 then
-						etat_futur <= E2;
+				When S7 =>
+					if previous_state = S2 then
+						next_state<= S12;
+					elsif previous_state = S3 then
+						next_state<= S11;
+					elsif previous_state = S4 then
+						next_state<= S10;
+					elsif previous_state = S10 then
+						next_state<= S4;
+					elsif previous_state = S11 then
+						next_state<= S3;
+					elsif previous_state = S12 then
+						next_state<= S2;
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 						
-				When E8 =>
-					if etat_precedent = E3 then
-						etat_futur <= E11;
-					elsif etat_precedent = E4 then
-						etat_futur <= E12;
-					elsif etat_precedent = E11 then
-						etat_futur <= E3;
-					elsif etat_precedent = E12 then
-						etat_futur <= E4;
+				When S8 =>
+					if previous_state = S3 then
+						next_state<= S11;
+					elsif previous_state = S4 then
+						next_state<= S12;
+					elsif previous_state = S11 then
+						next_state<= S3;
+					elsif previous_state = S12 then
+						next_state<= S4;
 
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 						
-				When E9 =>
-					if etat_precedent = E5 then
-						etat_futur <= E13;
-					elsif etat_precedent = E6 then
-						etat_futur <= E14;
-					elsif etat_precedent = E13 then
-						etat_futur <= E5;
-					elsif etat_precedent = E14 then
-						etat_futur <= E6;
+				When S9 =>
+					if previous_state = S5 then
+						next_state<= S13;
+					elsif previous_state = S6 then
+						next_state<= S14;
+					elsif previous_state = S13 then
+						next_state<= S5;
+					elsif previous_state = S14 then
+						next_state<= S6;
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 						
-				When E10 =>
-					if etat_precedent = E5 then
-						etat_futur <= E15;
-					elsif etat_precedent = E6 then
-						etat_futur <= E14;
-					elsif etat_precedent = E7 then
-						etat_futur <= E13;
-					elsif etat_precedent = E13 then
-						etat_futur <= E7;
-					elsif etat_precedent = E14 then
-						etat_futur <= E6;
-					elsif etat_precedent = E15 then
-						etat_futur <= E5;
+				When S10 =>
+					if previous_state = S5 then
+						next_state<= S15;
+					elsif previous_state = S6 then
+						next_state<= S14;
+					elsif previous_state = S7 then
+						next_state<= S13;
+					elsif previous_state = S13 then
+						next_state<= S7;
+					elsif previous_state = S14 then
+						next_state<= S6;
+					elsif previous_state = S15 then
+						next_state<= S5;
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 						
-				When E11 =>
-					if etat_precedent = E6 then
-						etat_futur <= E16;
-					elsif etat_precedent = E7 then
-						etat_futur <= E15;
-					elsif etat_precedent = E8 then
-						etat_futur <= E14;
-					elsif etat_precedent = E14 then
-						etat_futur <= E8;
-					elsif etat_precedent = E15 then
-						etat_futur <= E7;
-					elsif etat_precedent = E16 then
-						etat_futur <= E6;
+				When S11 =>
+					if previous_state = S6 then
+						next_state<= S16;
+					elsif previous_state = S7 then
+						next_state<= S15;
+					elsif previous_state = S8 then
+						next_state<= S14;
+					elsif previous_state = S14 then
+						next_state<= S8;
+					elsif previous_state = S15 then
+						next_state<= S7;
+					elsif previous_state = S16 then
+						next_state<= S6;
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 						
-				When E12 =>
-					if etat_precedent = E7 then
-						etat_futur <= E15;
-					elsif etat_precedent = E8 then
-						etat_futur <= E16;
-					elsif etat_precedent = E15 then
-						etat_futur <= E7;
-					elsif etat_precedent = E16 then
-						etat_futur <= E8;
+				When S12 =>
+					if previous_state = S7 then
+						next_state<= S15;
+					elsif previous_state = S8 then
+						next_state<= S16;
+					elsif previous_state = S15 then
+						next_state<= S7;
+					elsif previous_state = S16 then
+						next_state<= S8;
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 						
-				When E13 =>
-					if etat_precedent = E9 then
-						etat_futur <= E17;
-					elsif etat_precedent = E10 then
-						etat_futur <= E18;
-					elsif etat_precedent = E17 then
-						etat_futur <= E9;
-					elsif etat_precedent = E18 then
-						etat_futur <= E10;
+				When S13 =>
+					if previous_state = S9 then
+						next_state<= S17;
+					elsif previous_state = S10 then
+						next_state<= S18;
+					elsif previous_state = S17 then
+						next_state<= S9;
+					elsif previous_state = S18 then
+						next_state<= S10;
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 						
-				When E14 =>
-					if etat_precedent = E9 then
-						etat_futur <= E19;
-					elsif etat_precedent = E10 then
-						etat_futur <= E18;
-					elsif etat_precedent = E11 then
-						etat_futur <= E17;
-					elsif etat_precedent = E17 then
-						etat_futur <= E11;
-					elsif etat_precedent = E18 then
-						etat_futur <= E10;
-					elsif etat_precedent = E19 then
-						etat_futur <= E9;
+				When S14 =>
+					if previous_state = S9 then
+						next_state<= S19;
+					elsif previous_state = S10 then
+						next_state<= S18;
+					elsif previous_state = S11 then
+						next_state<= S17;
+					elsif previous_state = S17 then
+						next_state<= S11;
+					elsif previous_state = S18 then
+						next_state<= S10;
+					elsif previous_state = S19 then
+						next_state<= S9;
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 						
-				When E15 =>
-					if etat_precedent = E10 then
-						etat_futur <= E20;
-					elsif etat_precedent = E11 then
-						etat_futur <= E19;
-					elsif etat_precedent = E12 then
-						etat_futur <= E18;
-					elsif etat_precedent = E18 then
-						etat_futur <= E12;
-					elsif etat_precedent = E19 then
-						etat_futur <= E11;
-					elsif etat_precedent = E20 then
-						etat_futur <= E10;
-					elsif etat_precedent = Loose1 then
-						etat_futur <= E11;
-					elsif etat_precedent = Loose2 then 
-						etat_futur <= E19;
+				When S15 =>
+					if previous_state = S10 then
+						next_state<= S20;
+					elsif previous_state = S11 then
+						next_state<= S19;
+					elsif previous_state = S12 then
+						next_state<= S18;
+					elsif previous_state = S18 then
+						next_state<= S12;
+					elsif previous_state = S19 then
+						next_state<= S11;
+					elsif previous_state = S20 then
+						next_state<= S10;
+					elsif previous_state = Loose1 then
+						next_state<= S11;
+					elsif previous_state = Loose2 then 
+						next_state<= S19;
 					
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 					
-				When E16 =>
-					if etat_precedent = E11 then
-						etat_futur <= E19;
-					elsif etat_precedent = E12 then
-						etat_futur <= E20;
-					elsif etat_precedent = E19 then
-						etat_futur <= E11;
-					elsif etat_precedent = E20 then
-						etat_futur <= E12;
+				When S16 =>
+					if previous_state = S11 then
+						next_state<= S19;
+					elsif previous_state = S12 then
+						next_state<= S20;
+					elsif previous_state = S19 then
+						next_state<= S11;
+					elsif previous_state = S20 then
+						next_state<= S12;
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 						
-				When E17 =>
-					if etat_precedent = E13 then
-						etat_futur <= E21;
-					elsif etat_precedent = E14 then
-						etat_futur <= E22;
-					elsif etat_precedent = E21 then
-						etat_futur <= E13;
-					elsif etat_precedent = E22 then
-						etat_futur <= E14;
+				When S17 =>
+					if previous_state = S13 then
+						next_state<= S21;
+					elsif previous_state = S14 then
+						next_state<= S22;
+					elsif previous_state = S21 then
+						next_state<= S13;
+					elsif previous_state = S22 then
+						next_state<= S14;
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 						
-				When E18 =>
-					if etat_precedent = E13 then
-						etat_futur <= E23;
-					elsif etat_precedent = E14 then
-						etat_futur <= E22;
-					elsif etat_precedent = E15 then
-						etat_futur <= E21;
-					elsif etat_precedent = E21 then
-						etat_futur <= E15;
-					elsif etat_precedent = E22 then
-						etat_futur <= E14;
-					elsif etat_precedent = E23 then
-						etat_futur <= E13;
+				When S18 =>
+					if previous_state = S13 then
+						next_state<= S23;
+					elsif previous_state = S14 then
+						next_state<= S22;
+					elsif previous_state = S15 then
+						next_state<= S21;
+					elsif previous_state = S21 then
+						next_state<= S15;
+					elsif previous_state = S22 then
+						next_state<= S14;
+					elsif previous_state = S23 then
+						next_state<= S13;
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 						
-				When E19 =>
-					if etat_precedent = E14 then
-						etat_futur <= E24;
-					elsif etat_precedent = E15 then
-						etat_futur <= E23;
-					elsif etat_precedent = E16 then
-						etat_futur <= E22;
-					elsif etat_precedent = E22 then
-						etat_futur <= E16;
-					elsif etat_precedent = E23 then
-						etat_futur <= E15;
-					elsif etat_precedent = E24 then
-						etat_futur <= E14;
+				When S19 =>
+					if previous_state = S14 then
+						next_state<= S24;
+					elsif previous_state = S15 then
+						next_state<= S23;
+					elsif previous_state = S16 then
+						next_state<= S22;
+					elsif previous_state = S22 then
+						next_state<= S16;
+					elsif previous_state = S23 then
+						next_state<= S15;
+					elsif previous_state = S24 then
+						next_state<= S14;
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 					
-				When E20 =>
-					if etat_precedent = E15 then
-						etat_futur <= E23;
-					elsif etat_precedent = E16 then
-						etat_futur <= E24;
-					elsif etat_precedent = E23 then
-						etat_futur <= E15;
-					elsif etat_precedent = E24 then
-						etat_futur <= E16;
+				When S20 =>
+					if previous_state = S15 then
+						next_state<= S23;
+					elsif previous_state = S16 then
+						next_state<= S24;
+					elsif previous_state = S23 then
+						next_state<= S15;
+					elsif previous_state = S24 then
+						next_state<= S16;
 					else
-						etat_futur <= ERROR;
+						
 					end if;
 						
-				When E21 =>
+				When S21 =>
 					
-					if bar2_present(1)  = '1' then
+					if bar2_current(1)  = '1' then
 						if rnd_cnt <= 5 then
-							etat_futur <= E18;
-						elsif rnd_cnt <= 10 then
-							etat_futur <= E17;
+							next_state<= S18;
+						elsE 
+							next_state<= S17;
 						end if;
 					else
-						etat_futur <= Loose1;
+						next_state<= Loose1;
 					end if;
 						
-				When E22 =>
+				When S22 =>
 					
-					if bar2_present(2) = '1' then
+					if bar2_current(2) = '1' then
 						if rnd_cnt <= 3 then
-							etat_futur <= E17;
+							next_state<= S17;
 						elsif rnd_cnt <= 6 then
-							etat_futur <= E18;
+							next_state<= S18;
 						elsif rnd_cnt <= 10 then
-							etat_futur <= E19;
+							next_state<= S19;
 						end if;
 					else
-						etat_futur <= Loose1;
+						next_state<= Loose1;
 					end if;
 					
-				When E23 =>
+				When S23 =>
 					
-					if bar2_present(3)= '1' then
+					if bar2_current(3)= '1' then
 						if rnd_cnt <= 3 then
-							etat_futur <= E20;
+							next_state<= S20;
 						elsif rnd_cnt <= 6 then
-							etat_futur <= E19;
+							next_state<= S19;
 						elsif rnd_cnt <= 10 then
-							etat_futur <= E18;
+							next_state<= S18;
 						end if;
 					else
-						etat_futur <= Loose1;
+						next_state<= Loose1;
 					end if;
 						
-				When E24 =>
+				When S24 =>
 					
-					if bar2_present(4)= '1' then
+					if bar2_current(4)= '1' then
 						if rnd_cnt <= 5 then
-							etat_futur <= E19;
+							next_state<= S20;
 						elsif rnd_cnt <= 10 then
-							etat_futur <= E20;
+							next_state<= S19;
 						end if;
 					else
-						etat_futur <= Loose1;
+						next_state<= Loose1;
 					end if;
 					
 				When Loose1 =>
 					if rst = '1' then
-						etat_futur <= E15;
+						next_state<= S15;
 					else
-						etat_futur <= Loose2;
+						next_state<= Loose2;
 					end if;
 					
 				When Loose2 =>
 					if rst = '1' then
-						etat_futur <= E15;
+						next_state<= S15;
 					else
-						etat_futur <= Loose1;
+						next_state<= Loose1;
 					end if;
-				when ERROR => etat_futur <= ERROR;
 				end case;
 			end process LogicComb_entree;
 			
 		
-		Mem_etat_bar1 : process(clk_10hz)
+		Mem_state_bar1 : process(clk_8hz)
 		 
 			begin
 
 					
-				if rising_edge(clk_10hz) then
-					bar1_present <= bar1_futur;
+				if rising_edge(clk_8hz) then
+					bar1_current <= bar1_futur;
 				end if;
 				
-		end process Mem_etat_bar1;
+		end process Mem_state_bar1;
 		
-		Mem_etat_bar2 : process(clk_10hz)
+		Mem_state_bar2 : process(clk_8hz)
 		
 			begin
 
 					
-				if rising_edge(clk_10hz) then
-					bar2_present <= bar2_futur;
+				if rising_edge(clk_8hz) then
+					bar2_current <= bar2_futur;
 				end if;
 				
-		end process Mem_etat_bar2;
+		end process Mem_state_bar2;
 		
 
 		
-		Sortie_bar1 : process(bar1_present)
+		Sortie_bar1 : process(bar1_current)
 			begin
-				case bar1_present is 
+				case bar1_current is 
 					when "1000" => leds(25 to 28) <= "1000";
 					when "0100" => leds(25 to 28) <= "0100";
 					when "0010" => leds(25 to 28) <= "0010";
@@ -566,9 +563,9 @@ begin
 				
 		end process Sortie_bar1;
 		
-		Sortie_bar2 : process(bar2_present)
+		Sortie_bar2 : process(bar2_current)
 			begin
-				case bar2_present is 
+				case bar2_current is 
 					when "1000" => leds(29 to 32) <= "1000";
 					when "0100" => leds(29 to 32) <= "0100";
 					when "0010" => leds(29 to 32) <= "0010";
@@ -578,229 +575,225 @@ begin
 				
 		end process Sortie_bar2;
 		
-		Mem_etat : process(clk_1hz)
+		Mem_state : process(clk_1hz)
 		begin
 			if rising_edge(clk_1hz) then
-				etat_precedent <= etat_present;
-				etat_present <= etat_futur;
+				previous_state <= current_state;
+				current_state<= next_state;
 			end if;
-		end process Mem_etat;
+		end process Mem_state;
 		
-		LogComb_sorties : process(etat_present)
+		LogComb_outputs : process(clk_1hz)
 		begin
 			
 			
-			case etat_present is
-				When E1 => 
+			case current_state is
+				When S1 => 
 					for i in 1 to 24 loop
 						if i = 1 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
 			
-				When E2 => 
+				When S2 => 
 					for i in 1 to 24 loop
 						if i = 2 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E3 => 
+				When S3 => 
 					for i in 1 to 24 loop
 						if i = 3 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E4 =>
+				When S4 =>
 					for i in 1 to 24 loop
 						if i = 4  then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E5 => 
+				When S5 => 
 					for i in 1 to 24 loop
 						if i = 5 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E6 => 
+				When S6 => 
 					for i in 1 to 24 loop
 						if i = 6 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E7 => 
+				When S7 => 
 					for i in 1 to 24 loop
 						if i = 7 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E8 => 
+				When S8 => 
 					for i in 1 to 24 loop
 						if i = 8 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E9 => 
+				When S9 => 
 					for i in 1 to 24 loop
 						if i = 9 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E10 => 
+				When S10 => 
 					for i in 1 to 24 loop
 						if i = 10 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E11 => 
+				When S11 => 
 					for i in 1 to 24 loop
 						if i = 11 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E12 => 
+				When S12 => 
 					for i in 1 to 24 loop
 						if i = 12 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E13 => 
+				When S13 => 
 					for i in 1 to 24 loop
 						if i = 13 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E14 => 
+				When S14 => 
 					for i in 1 to 24 loop
 						if i = 14 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E15 => 
+				When S15 => 
 					for i in 1 to 24 loop
 						if i = 15 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E16 => 
+				When S16 => 
 					for i in 1 to 24 loop
 						if i = 16 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E17 => 
+				When S17 => 
 					for i in 1 to 24 loop
 						if i = 17 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E18 => 
+				When S18 => 
 					for i in 1 to 24 loop
 						if i = 18 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E19 => 
+				When S19 => 
 					for i in 1 to 24 loop
 						if i = 19 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E20 => 
+				When S20 => 
 					for i in 1 to 24 loop
 						if i = 20 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E21 => 
+				When S21 => 
 					for i in 1 to 24 loop
 						if i = 21 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E22 => 
+				When S22 => 
 					for i in 1 to 24 loop
 						if i = 22 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E23 => 
+				When S23 => 
 					for i in 1 to 24 loop
 						if i = 23 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
-				When E24 => 
+				When S24 => 
 					for i in 1 to 24 loop
 						if i = 24 then
 							leds(i) <= '1';
 						else
-							leds(i) <='Z';
+							leds(i) <='0';
 						end if;
 					end loop;
 					
-				When loose1 => 
+				When Loose1 => 
 					for i in 1 to 24 loop
 						leds(i) <= '1';
 					end loop;
 					
-				When loose2 => 
+				When Loose2 => 
 					for i in 1 to 24 loop
-						leds(i) <='Z';
+						leds(i) <='0';
 					end loop;
-				when ERROR =>
-					for i in 1 to 24 loop
-						leds(i) <='Z';
-					end loop;
+
 				end case;
-			end process LogComb_sorties;
+			end process LogComb_outputs;
 			
 
-					
 end Behavourial;
