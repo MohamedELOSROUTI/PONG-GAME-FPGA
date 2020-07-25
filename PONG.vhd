@@ -1,6 +1,5 @@
  library ieee;
  use ieee.std_logic_1164.all;
- --use ieee.std_logic_arith.all;
  entity PONG is 
 	Port(
 				Clk_50MHz  : in std_logic:='0';
