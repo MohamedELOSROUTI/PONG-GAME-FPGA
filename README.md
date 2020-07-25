@@ -85,7 +85,7 @@ Here's the effect of using a capacitor : the oscilliations are removed
   <img src="https://i.imgur.com/Q33EDYZ.png width="600" height="500" "  />
 </p>
 
-
+For more information, have a look to this intersting article : https://www.allaboutcircuits.com/technical-articles/switch-bounce-how-to-deal-with-it/
 
 - Software approach : make use of a 'low frequency' clock that settles the time at which a high value (logical '1') is read. This solution is chosen for this project. Each 120 ms (rising_edge), we check the value of the input pin, if it is set to '1', then move the yellow led one step further. 
 
