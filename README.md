@@ -61,7 +61,7 @@ See RTL 1.pdf and RTL 2. pdf to view the RTL representations.
   <img src="https://i.imgur.com/AwwOMj3.jpg" width="100" height="100"/>
 </p>
 
-When a press a push button, there is a switch bounce problem. Instead of generating a single logical '1' value. It generates many transitions '1', '0', '1', ... during few microseconds before reching the final state '1'. 
+When we press a push button, there is a switch bounce problem. Instead of generating a single logical '1' value. It generates many transitions '1', '0', '1', ... during few microseconds before reching the final state '1'. 
 
 Here's a plot of what happens when we press the push button :
 
