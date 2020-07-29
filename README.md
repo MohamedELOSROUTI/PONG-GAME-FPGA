@@ -2,7 +2,7 @@
 
 ## Hardware design
 
-The objective of this project is to program a two-player pong game on a FPGA using the VHDL language. The FPGA used is a Cyclone IV E : EP4CE6E22C8 from Altera. The large amount of input/output pin of this FPGA allows dealing with many leds without using external componenents likes decoders.
+The objective of this project is to program a two-players pong game on a FPGA using the VHDL language. The FPGA used is a Cyclone IV E : EP4CE6E22C8 from Altera. The large amount of input/output pins of this FPGA allows dealing with many leds without using external componenents likes decoders.
 
 A matrix (4x8) of 32 leds is used as a visual platform. Each anode is connected to an output pin and the cathodes are connected to the ground with a series resistor. The upper leds line is dedicated to player 2 and lower leds line is dedicated to player 1. Each player is free to move a horizontal bar using two leds. For this purpose, two press button are dedicated to each player in order to move left or right their bars. And a reset button is present in case one player desires to restart the game. 
 
