@@ -587,199 +587,30 @@ begin
 			
 			
 			case current_state is
-				When S1 => 
-					for i in 1 to 24 loop
-						if i = 1 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-			
-				When S2 => 
-					for i in 1 to 24 loop
-						if i = 2 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S3 => 
-					for i in 1 to 24 loop
-						if i = 3 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S4 =>
-					for i in 1 to 24 loop
-						if i = 4  then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S5 => 
-					for i in 1 to 24 loop
-						if i = 5 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S6 => 
-					for i in 1 to 24 loop
-						if i = 6 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S7 => 
-					for i in 1 to 24 loop
-						if i = 7 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S8 => 
-					for i in 1 to 24 loop
-						if i = 8 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S9 => 
-					for i in 1 to 24 loop
-						if i = 9 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S10 => 
-					for i in 1 to 24 loop
-						if i = 10 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S11 => 
-					for i in 1 to 24 loop
-						if i = 11 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S12 => 
-					for i in 1 to 24 loop
-						if i = 12 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S13 => 
-					for i in 1 to 24 loop
-						if i = 13 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S14 => 
-					for i in 1 to 24 loop
-						if i = 14 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S15 => 
-					for i in 1 to 24 loop
-						if i = 15 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S16 => 
-					for i in 1 to 24 loop
-						if i = 16 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S17 => 
-					for i in 1 to 24 loop
-						if i = 17 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S18 => 
-					for i in 1 to 24 loop
-						if i = 18 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S19 => 
-					for i in 1 to 24 loop
-						if i = 19 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S20 => 
-					for i in 1 to 24 loop
-						if i = 20 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S21 => 
-					for i in 1 to 24 loop
-						if i = 21 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S22 => 
-					for i in 1 to 24 loop
-						if i = 22 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S23 => 
-					for i in 1 to 24 loop
-						if i = 23 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
-				When S24 => 
-					for i in 1 to 24 loop
-						if i = 24 then
-							leds(i) <= '1';
-						else
-							leds(i) <='0';
-						end if;
-					end loop;
+				When S1  => leds(1 to 24) <= ( 1 => '1', others => '0');
+				When S2  => leds(1 to 24) <= ( 2 => '1', others => '0');
+				When S3  => leds(1 to 24) <= ( 3 => '1', others => '0');
+				When S4  => leds(1 to 24) <= ( 4 => '1', others => '0');
+				When S5  => leds(1 to 24) <= ( 5 => '1', others => '0');
+				When S6  => leds(1 to 24) <= ( 6 => '1', others => '0');
+				When S7  => leds(1 to 24) <= ( 7 => '1', others => '0');
+				When S8  => leds(1 to 24) <= ( 8 => '1', others => '0');
+				When S9  => leds(1 to 24) <= ( 9 => '1', others => '0');
+				When S10 => leds(1 to 24) <= (10 => '1', others => '0');
+				When S11 => leds(1 to 24) <= (11 => '1', others => '0');
+				When S12 => leds(1 to 24) <= (12 => '1', others => '0');
+				When S13 => leds(1 to 24) <= (13 => '1', others => '0');
+				When S14 => leds(1 to 24) <= (14 => '1', others => '0');
+				When S15 => leds(1 to 24) <= (15 => '1', others => '0');
+				When S16 => leds(1 to 24) <= (16 => '1', others => '0');
+				When S17 => leds(1 to 24) <= (17 => '1', others => '0');
+				When S18 => leds(1 to 24) <= (18 => '1', others => '0');
+				When S19 => leds(1 to 24) <= (19 => '1', others => '0');
+				When S20 => leds(1 to 24) <= (20 => '1', others => '0');
+				When S21 => leds(1 to 24) <= (21 => '1', others => '0');
+				When S22 => leds(1 to 24) <= (22 => '1', others => '0');
+				When S23 => leds(1 to 24) <= (23 => '1', others => '0');
+				When S24 => leds(1 to 24) <= (24 => '1', others => '0');
 					
 				When Loose1 => 
 					for i in 1 to 24 loop
