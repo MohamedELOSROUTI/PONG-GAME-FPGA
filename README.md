@@ -1,5 +1,7 @@
 # IMPLEMENTATION OF THE PONG GAME USING AN FPGA 
 
+video link : https://www.youtube.com/watch?v=U0qfb-gVDw8
+
 ## Hardware design
 
 The objective of this project is to program a two-players pong game on a FPGA using the VHDL language. The FPGA used is a Cyclone IV E : EP4CE6E22C8 from Altera. The large amount of input/output pins of this FPGA allows dealing with many leds without using external componenents likes decoders.
